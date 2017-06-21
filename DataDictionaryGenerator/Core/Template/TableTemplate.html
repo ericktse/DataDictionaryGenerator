@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>{{[title][]}}</title>
+    <style type="text/css">
+        body {
+            font-size: 9pt;
+            font-family: '微软雅黑';
+        }
+
+        .title {
+            font-size: 14px;
+            padding-top: 15px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        a {
+            color: #015FB6;
+            float: right;
+            margin-top: 6px;
+        }
+
+            a:link, a:visited, a:active {
+                color: #015FB6;
+                text-decoration: none;
+            }
+
+            a:hover {
+                color: #E33E06;
+            }
+    </style>
+</head>
+<body>
+    <div class="title">
+        <div>表名：{{[tablename][]}}</div>
+        <div>说明：{{[tableremark][]}}</div>
+        <a href='{{[tablehref][]}}'>返回目录</a>
+    </div>
+    <table cellspacing="0" cellpadding="5" border="1" width="100%">
+        <tr>
+            <th>序号</th>
+            <th>列名</th>
+            <th>数据类型</th>
+            <th>主键</th>
+            <th>允许空</th>
+            <th>说明</th>
+        </tr>
+        {{
+        [tabledetail]
+        [<tr>
+            <td class="text-center">(tdnum)</td>
+            <td>(tdname)</td>
+            <td>(tdtype)</td>
+            <td class="text-center">(tdprimarykey)</td>
+            <td class="text-center">(tdnull)</td>
+            <td>(tdremark)</td>
+        </tr>]
+}}
+    </table>
+</body>
+</html>

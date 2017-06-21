@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>{{[title][]}}</title>
+    <style type="text/css">
+        body {
+            font-size: 9pt;
+            font-family: '微软雅黑';
+        }
+
+        .title {
+            font-size: 14px;
+            padding-top: 15px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        a {
+            color: #015FB6;
+        }
+
+            a:link, a:visited, a:active {
+                color: #015FB6;
+                text-decoration: none;
+            }
+
+            a:hover {
+                color: #E33E06;
+            }
+    </style>
+</head>
+<body>
+    <div>
+        <table cellspacing="0" cellpadding="5" border="1" width="100%">
+            <caption>
+                <div class="title">
+                    <b>{{[tabletitle][]}}</b>
+                </div>
+            </caption>
+            <tr>
+                <th>序号</th>
+                <th>表名</th>
+                <th>说明</th>
+            </tr>
+            {{
+            [tabledetail]
+            [<tr>
+                <td class="text-center">(tdnum)</td>
+                <td><a href="(tdhref)">(tdname)</a></td>
+                <td>(tdremark)</td>
+            </tr>]
+}}
+        </table>
+    </div>
+</body>
+</html>
