@@ -9,3 +9,10 @@
 
 - PDM To CHM
 - MSSQL To CHM
+
+## 截图
+
+![screenshot](screenshot.png)
+
+## 版本下载
+https://github.com/ericktse/DataDictionaryGenerator/releases
