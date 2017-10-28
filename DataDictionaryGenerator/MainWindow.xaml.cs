@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using DataDictionaryGenerator.Core;
 using Microsoft.Win32;
+using DataDictionaryGenerator.Model;
 
 namespace DataDictionaryGenerator
 {
@@ -31,7 +32,14 @@ namespace DataDictionaryGenerator
 
         private void BtnBuild_Click(object sender, RoutedEventArgs e)
         {
-            string[] paths = TxbPdmFile.Text.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var filename = TxbPdmFile.Text;
+            if (string.IsNullOrEmpty(filename))
+            {
+                ShowMessage("请选择PDM文件");
+                return;
+            }
+
+            string[] paths = filename.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             var file = paths.FirstOrDefault(x =>
             {
                 var extension = Path.GetExtension(x);
@@ -44,46 +52,8 @@ namespace DataDictionaryGenerator
                     ? $"PDM_{DateTime.Now.ToString("yyyyMMddhhmmss")}"
                     : TxbOutputName.Text;
 
-                LoadingDialog.IsOpen = true;
-                Task.Run(() =>
-                {
-                    IReader pdmReader = new PdmReader();
-                    var models = pdmReader.Read(file);
-                    HtmlGenerator.GeneralHtml(name, models);
-
-                    var filename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-                        name + ".chm");
-                    var defaultpage = $"{HtmlGenerator.CATALOGUEFILENAME}.html";
-
-                    ChmGenerator chm = new ChmGenerator(filename, name, defaultpage, name);
-                    bool isSuccess = chm.Compile();
-
-                    HtmlGenerator.DeleteHtml(name);
-
-                    LoadingDialog.Dispatcher.Invoke(() =>
-                    {
-                        LoadingDialog.IsOpen = false;
-                    });
-
-                    if (isSuccess)
-                    {
-                        SnackbarMsg.Dispatcher.Invoke(() =>
-                        {
-                            var messageQueue = SnackbarMsg.MessageQueue;
-                            var message = $"生成成功，文件目录：{filename}";
-                            Task.Factory.StartNew(() => messageQueue.Enqueue(message));
-                        });
-                    }
-                    else
-                    {
-                        SnackbarMsg.Dispatcher.Invoke(() =>
-                        {
-                            var messageQueue = SnackbarMsg.MessageQueue;
-                            var message = "生成失败";
-                            Task.Factory.StartNew(() => messageQueue.Enqueue(message));
-                        });
-                    }
-                });
+                IReader reader = new PdmReader();
+                GeneralChm(reader, file, name);
             }
         }
 
@@ -94,18 +64,32 @@ namespace DataDictionaryGenerator
         private void BtnSqlBuild_Click(object sender, RoutedEventArgs e)
         {
             string connectStr = TxbSqlConnectStr.Text;
+            if (string.IsNullOrEmpty(connectStr))
+            {
+                ShowMessage("请输入数据库连接");
+                return;
+            }
 
             var name = string.IsNullOrEmpty(TxbSqlOutputName.Text)
                     ? $"SQL_{DateTime.Now.ToString("yyyyMMddhhmmss")}"
                     : TxbSqlOutputName.Text;
 
+            IReader reader = new MsSqlReader();
+            GeneralChm(reader, connectStr, name);
+        }
+
+        #endregion //SQL Server
+
+
+        #region Common Methods
+
+        private void GeneralChm(IReader reader, string input, string name)
+        {
             LoadingDialog.IsOpen = true;
 
             Task.Run(() =>
             {
-                IReader pdmReader = new MsSqlReader();
-                var models = pdmReader.Read(connectStr);
-
+                var models = reader.Read(input);
                 HtmlGenerator.GeneralHtml(name, models);
 
                 var filename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
@@ -124,25 +108,26 @@ namespace DataDictionaryGenerator
 
                 if (isSuccess)
                 {
-                    SnackbarMsg.Dispatcher.Invoke(() =>
-                    {
-                        var messageQueue = SnackbarMsg.MessageQueue;
-                        var message = $"生成成功，文件目录：{filename}";
-                        Task.Factory.StartNew(() => messageQueue.Enqueue(message));
-                    });
+                    var message = $"生成成功，文件目录：{filename}";
+                    ShowMessage(message);
                 }
                 else
                 {
-                    SnackbarMsg.Dispatcher.Invoke(() =>
-                    {
-                        var messageQueue = SnackbarMsg.MessageQueue;
-                        var message = "生成失败";
-                        Task.Factory.StartNew(() => messageQueue.Enqueue(message));
-                    });
+                    var message = "生成失败";
+                    ShowMessage(message);
                 }
             });
         }
 
-        #endregion //SQL Server
+        private void ShowMessage(string message)
+        {
+            SnackbarMsg.Dispatcher.Invoke(() =>
+            {
+                var messageQueue = SnackbarMsg.MessageQueue;
+                Task.Run(() => messageQueue.Enqueue(message));
+            });
+        }
+
+        #endregion //Common Methods
     }
 }
